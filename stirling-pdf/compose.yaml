@@ -1,8 +1,13 @@
+---
+x-defaults: &defaults
+  security_opt:
+    - no-new-privileges:true
 services:
   stirling-pdf:
-    image: stirlingtools/stirling-pdf:latest
+    <<: *defaults
+    image: docker.io/stirlingtools/stirling-pdf:2.14.2-fat
     ports:
-      - '9000:8080'
+      - 127.0.0.1:9000:8080
     environment:
       SYSTEM_ENABLEANALYTICS: false
     volumes:
