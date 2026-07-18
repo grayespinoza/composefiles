@@ -9,6 +9,7 @@ services:
     ports:
       - 127.0.0.1:9000:8080
     environment:
-      SYSTEM_ENABLEANALYTICS: false
+      - SECURITY_ENABLELOGIN=false
+      - SYSTEM_ENABLEANALYTICS=false
     volumes:
       - ./stirling-data:/configs
