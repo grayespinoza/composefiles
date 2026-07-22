@@ -1,0 +1,49 @@
+---
+x-defaults: &defaults
+  cap_drop:
+    - ALL
+  security_opt:
+    - no-new-privileges:true
+services:
+  llama-cpp:
+    <<: *defaults
+    restart: unless-stopped
+    cap_add:
+      - IPC_LOCK
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    devices:
+      - nvidia.com/gpu=all
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    volumes:
+      - ./models:/models
+    command:
+      - -hf
+      - unsloth/Qwen3.6-35B-A3B-GGUF
+      - -ngl
+      - "999"
+      - --n-cpu-moe
+      - "33"
+      - --no-mmap
+      - --mlock
+      - --ctx-size
+      - "128000"
+  openwebui:
+    <<: *defaults
+    restart: unless-stopped
+    image: ghcr.io/open-webui/open-webui:v0.10.2
+    depends_on:
+      - llama-cpp
+    ports:
+      - 127.0.0.1:8090:8080
+    environment:
+      OPENAI_API_BASE_URL: "http://llama-cpp:8080/v1"
+      WEBUI_AUTH: "false"
+    volumes:
+      - open-webui:/app/backend/data
+volumes:
+  open-webui:
