@@ -8,9 +8,13 @@ services:
   llama-cpp:
     <<: *defaults
     restart: unless-stopped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
     cap_add:
       - IPC_LOCK
-    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    image: ghcr.io/grayespinoza/llama-cpp-turboquant:server-cuda
     devices:
       - nvidia.com/gpu=all
     healthcheck:
@@ -22,16 +26,21 @@ services:
     volumes:
       - ./models:/models
     command:
-      - -hf
-      - unsloth/Qwen3.6-35B-A3B-GGUF
+      - -m
+      - /models/Qwen3.6-35B-A3B-UD-Q4_K_M.gguf
       - -ngl
       - "999"
       - --n-cpu-moe
       - "33"
       - --no-mmap
       - --mlock
+      - --cache-type-k
+      - "turbo4"
+      - --cache-type-v
+      - "turbo3"
+      - --jinja
       - --ctx-size
-      - "128000"
+      - "256000"
   openwebui:
     <<: *defaults
     restart: unless-stopped
